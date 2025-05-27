@@ -29,9 +29,11 @@
       "**/node_modules/**"
     ],
     "rewrites": [
-      {
-        "source": "**",
-        "destination": "/index.html"
+      { 
+        "source": "/handleDiscordCallback", "function": "handleDiscordCallback" 
+      },
+      { 
+        "source": "**", "destination": "/index.html" 
       }
     ]
   },

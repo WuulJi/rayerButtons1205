@@ -89,3 +89,12 @@ day2_index.md
 
 # Environment files (local configs)
 /.env.*
+
+# rayerPictures
+1056623719700770836.png
+
+# serviceAccountKey
+serviceAccountKey.json
+
+#config
+firebaseConfig.js

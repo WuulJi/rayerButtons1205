@@ -69,15 +69,25 @@ body {
 }
 
 .login-btn {
-    background-color: var(--accent-color);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #5865F2;
     color: white;
     padding: 8px 16px;
-    border-radius: 20px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
 }
 
 .login-btn:hover {
-    background-color: var(--secondary-color);
-    color: white;
+    background-color: #4752C4;
+}
+
+.discord-icon {
+    width: 20px;
+    height: 20px;
 }
 
 .mobile-menu-btn {
