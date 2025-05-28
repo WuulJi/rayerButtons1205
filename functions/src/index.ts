@@ -20,11 +20,13 @@ dotenv.config();
 // https://firebase.google.com/docs/functions/typescript
 
 // 初始化 Firebase Admin SDK
+const serviceAccountPath = path.resolve(__dirname, "../serviceAccountKey.json");
+if (!fs.existsSync(serviceAccountPath)) {
+  logger.error("Service account key file not found at", serviceAccountPath);
+  throw new Error("Service account key file not found");
+}
 const serviceAccount = JSON.parse(
-  fs.readFileSync(
-    path.resolve(__dirname, "../serviceAccountKey.json"),
-    "utf8",
-  ),
+  fs.readFileSync(serviceAccountPath, "utf8"),
 );
 
 admin.initializeApp({
@@ -32,9 +34,30 @@ admin.initializeApp({
 });
 
 // Discord OAuth 配置
-const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID!;
-const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET!;
-const REDIRECT_URI = process.env.REDIRECT_URI!;
+const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID;
+const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
+const REDIRECT_URI = process.env.REDIRECT_URI;
+const TARGET_GUILD_ID = process.env.TARGET_GUILD_ID;
+
+if (
+  !DISCORD_CLIENT_ID ||
+  !DISCORD_CLIENT_SECRET ||
+  !REDIRECT_URI ||
+  !TARGET_GUILD_ID
+) {
+  const missingVars = [];
+  if (!DISCORD_CLIENT_ID) missingVars.push("DISCORD_CLIENT_ID");
+  if (!DISCORD_CLIENT_SECRET) missingVars.push("DISCORD_CLIENT_SECRET");
+  if (!REDIRECT_URI) missingVars.push("REDIRECT_URI");
+  if (!TARGET_GUILD_ID) missingVars.push("TARGET_GUILD_ID");
+  logger.error(
+    "Missing environment variables:",
+    missingVars.join(", ")
+  );
+  throw new Error(
+    `Missing environment variables: ${missingVars.join(", ")}`
+  );
+}
 
 // Discord API 響應類型
 interface DiscordTokenResponse {
@@ -48,9 +71,27 @@ interface DiscordTokenResponse {
 interface DiscordUser {
   id: string;
   username: string;
-  avatar: string;
-  discriminator: string;
+  avatar: string | null; // Avatar can be null
+  discriminator: string; // Discriminator might not exist for new users, handle accordingly
   email?: string;
+}
+
+interface DiscordGuild {
+  id: string;
+  name: string;
+  icon: string | null;
+  owner: boolean;
+  permissions: string; // This is a string representing a bitwise value
+  features: string[];
+}
+
+interface UserDocument {
+  id: string;
+  username: string;
+  avatar?: string | null;
+  discriminator?: string;
+  lastLogin: admin.firestore.FieldValue;
+  isMemberOfTargetGuild: boolean;
 }
 
 export const helloWorld = onRequest((request, response) => {
@@ -78,11 +119,11 @@ export const handleDiscordCallback = functions.https.onRequest(
           "Content-Type": "application/x-www-form-urlencoded",
         },
         body: new URLSearchParams({
-          client_id: DISCORD_CLIENT_ID,
-          client_secret: DISCORD_CLIENT_SECRET,
+          client_id: DISCORD_CLIENT_ID, // Already checked for existence
+          client_secret: DISCORD_CLIENT_SECRET, // Already checked
           grant_type: "authorization_code",
           code: code as string,
-          redirect_uri: REDIRECT_URI,
+          redirect_uri: REDIRECT_URI, // Already checked
         }),
       });
 
@@ -99,7 +140,36 @@ export const handleDiscordCallback = functions.https.onRequest(
         },
       });
 
+      if (!userResponse.ok) {
+        throw new Error("Failed to get user info");
+      }
+
       const userData = await userResponse.json() as DiscordUser;
+
+      // 2.1 獲取用戶的伺服器列表
+      const guildsResponse = await fetch("https://discord.com/api/users/@me/guilds", {
+        headers: {
+          Authorization: `Bearer ${tokenData.access_token}`,
+        },
+      });
+
+      if (!guildsResponse.ok) {
+        throw new Error("Failed to get user guilds");
+      }
+
+      const guilds = await guildsResponse.json() as DiscordGuild[];
+      // 2.2 檢查用戶是否為目標伺服器的成員
+      const isMemberOfTargetGuild = guilds.some((guild) =>
+        guild.id === TARGET_GUILD_ID
+      );
+
+      if (!isMemberOfTargetGuild) {
+        res.status(403).json({
+          error: "Unauthorized",
+          message: "You must be a member of the target Discord server to login",
+        });
+        return;
+      }
 
       // 3. 創建或更新 Firebase 用戶
       const uid = `discord:${userData.id}`;
@@ -128,12 +198,15 @@ export const handleDiscordCallback = functions.https.onRequest(
       const customToken = await admin.auth().createCustomToken(uid);
 
       // 5. 將用戶信息存儲到 Firestore
-      const userDoc: any = {
+      const userDoc: UserDocument = {
         id: userData.id,
         username: userData.username,
-        avatar: userData.avatar,
-        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        lastLogin: admin.firestore.FieldValue.serverTimestamp(),
+        isMemberOfTargetGuild: true,
       };
+      if (userData.avatar) {
+        userDoc.avatar = userData.avatar;
+      }
       if (userData.discriminator) {
         userDoc.discriminator = userData.discriminator;
       }
@@ -142,17 +215,18 @@ export const handleDiscordCallback = functions.https.onRequest(
       // }
       await admin.firestore()
         .collection("users")
-        .doc(uid)
+        .doc(uid) // Use uid for Firestore document ID as well for consistency
         .set(userDoc, {merge: true});
 
       // 6. 返回自定義 token
       res.json({token: customToken});
     } catch (error) {
-      console.error("Error in Discord callback:", error);
+      logger.error("Error in Discord callback:", error);
       res.status(500).json({
         error: "Internal server error",
         details: error instanceof Error ?
-          error.message : String(error),
+          error.message :
+          String(error),
       });
     }
   },

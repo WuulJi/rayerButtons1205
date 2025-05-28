@@ -18,6 +18,17 @@
           // 呼叫 Cloud Function 兌換 custom token
           const response = await fetch(`/handleDiscordCallback?code=${code}`);
           const data = await response.json();
+
+          if (!response.ok) {
+            if (response.status === 403) {
+              alert('您必須是目標 Discord 伺服器的成員才能登入。');
+            } else {
+              alert('登入失敗：' + (data.error || '未知錯誤'));
+            }
+            window.location.href = '/';
+            return;
+          }
+
           if (data.token) {
             // 用 custom token 登入 Firebase
             await firebase.auth().signInWithCustomToken(data.token);
