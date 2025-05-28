@@ -61,30 +61,3 @@ function loadUserData(uid) {
             console.error("Error loading user data:", error);
         });
 }
-
-// Check for code in URL (Discord OAuth callback)
-const urlParams = new URLSearchParams(window.location.search);
-const code = urlParams.get('code');
-
-if (code) {
-    // 調用 Cloud Function 處理 OAuth 回調
-    fetch(`/handleDiscordCallback?code=${code}`)
-        .then(response => response.json())
-        .then(data => {
-            console.log('callback data:', data); 
-            if (data.token) {
-                // 使用自定義 token 登入 Firebase
-                return firebase.auth().signInWithCustomToken(data.token);
-            } else {
-                throw new Error("No token received");
-            }
-        })
-        .then(() => {
-            // 重定向到首頁
-            window.location.href = "/";
-        })
-        .catch((error) => {
-            console.error("Error during callback:", error);
-            //alert("登入失敗，請重試");
-        });
-}

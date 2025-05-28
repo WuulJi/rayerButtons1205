@@ -15,7 +15,7 @@
       const code = urlParams.get('code');
       if (code) {
         try {
-          // 呼叫 Cloud Function 兌換 custom token
+          // 呼叫 Cloud Function 處理 Discord OAuth 回調，兌換 custom token
           const response = await fetch(`/handleDiscordCallback?code=${code}`);
           const data = await response.json();
 
@@ -30,7 +30,7 @@
           }
 
           if (data.token) {
-            // 用 custom token 登入 Firebase
+            // 使用自定義的 custom token 登入 Firebase
             await firebase.auth().signInWithCustomToken(data.token);
             // 登入成功，導回首頁
             window.location.href = '/';
