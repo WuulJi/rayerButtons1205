@@ -86,6 +86,7 @@ node_modules/
 # chat 紀錄
 day1_環境設定.md
 day2_index.md
+day3_DC登入功能.md
 
 # Environment files (local configs)
 /.env.*
