@@ -33,7 +33,10 @@
                 <a href="#" class="nav-link">首頁</a>
                 <a href="#" class="nav-link">音效列表</a>
                 <a href="#" class="nav-link">關於我們</a>
-                <a href="#" class="nav-link login-btn">登入</a>
+                <button id="discord-login" class="nav-link login-btn" onclick="loginWithDiscord()">
+                    <img src="https://assets-global.website-files.com/6257adef93867e50d84d30e2/636e0a6a49cf127bf92de1e2_icon_clyde_white_RGB.png" alt="Discord" class="discord-icon">
+                    使用 Discord 登入
+                </button>
             </div>
             <button class="mobile-menu-btn">
                 <span></span>
@@ -88,6 +91,9 @@
         </div>
     </footer>
 
-    <script src="/js/script.js"></script>
+    <script src="/js/firebaseConfig.js" type="module"></script>
+    <script src="/js/auth.js" type="module"></script>
+    <script src="/js/dclogin.js" type="module"></script>
+    <script src="/js/script.js" type="module"></script>
 </body>
 </html> 

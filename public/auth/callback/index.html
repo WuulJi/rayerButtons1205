@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>Discord 登入中...</title>
+  <!-- 載入 Firebase SDK（compat 版，與主站一致） -->
+  <script defer src="/__/firebase/11.8.1/firebase-app-compat.js"></script>
+  <script defer src="/__/firebase/11.8.1/firebase-auth-compat.js"></script>
+  <script defer src="/__/firebase/init.js?useEmulator=true"></script>
+  <script type="module">
+    // 等待 Firebase SDK 載入
+    window.addEventListener('DOMContentLoaded', async () => {
+      // 讀取 code
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get('code');
+      if (code) {
+        try {
+          // 呼叫 Cloud Function 處理 Discord OAuth 回調，兌換 custom token
+          const response = await fetch(`/handleDiscordCallback?code=${code}`);
+          const data = await response.json();
+
+          if (!response.ok) {
+            if (response.status === 403) {
+              alert('您必須是目標 Discord 伺服器的成員才能登入。');
+            } else {
+              alert('登入失敗：' + (data.error || '未知錯誤'));
+            }
+            window.location.href = '/';
+            return;
+          }
+
+          if (data.token) {
+            // 使用自定義的 custom token 登入 Firebase
+            await firebase.auth().signInWithCustomToken(data.token);
+            // 登入成功，導回首頁
+            window.location.href = '/';
+          } else {
+            throw new Error(data.error || 'No token received');
+          }
+        } catch (err) {
+          document.body.innerHTML = `<h2>登入失敗：${err.message}</h2>`;
+        }
+      } else {
+        document.body.innerHTML = '<h2>缺少 code 參數</h2>';
+      }
+    });
+  </script>
+</head>
+<body>
+  <h2>Discord 登入中，請稍候...</h2>
+</body>
+</html>
