@@ -31,11 +31,6 @@ firebase.auth().onAuthStateChanged((user) => {
         }
         // 綁定登出
         document.getElementById("logout-btn").onclick = logout;
-        // 綁定上傳
-        document.getElementById("upload-audio-btn").onclick = function() {
-            // TODO: 上傳邏輯
-            alert('上傳功能尚未實作');
-        };
         // 下拉選單切換
         const userMenuBtn = document.getElementById('user-menu-btn');
         const userDropdown = document.getElementById('user-dropdown');
