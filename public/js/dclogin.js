@@ -8,27 +8,52 @@ const app = initializeApp(firebaseConfig);
 // Set up auth state listener
 firebase.auth().onAuthStateChanged((user) => {
     const loginBtn = document.getElementById("discord-login");
-    if (loginBtn) {
-        if (user) {
-            // 用戶已登入
-            loginBtn.innerHTML = `
-                <img src="${user.photoURL || 'https://assets-global.website-files.com/6257adef93867e50d84d30e2/636e0a6a49cf127bf92de1e2_icon_clyde_white_RGB.png'}" 
-                     alt="Discord" 
-                     class="discord-icon">
-                ${user.displayName || '已登入'}
-            `;
-            loginBtn.onclick = logout;
-            loadUserData(user.uid);
-        } else {
-            // 用戶未登入
-            loginBtn.innerHTML = `
-                <img src="https://assets-global.website-files.com/6257adef93867e50d84d30e2/636e0a6a49cf127bf92de1e2_icon_clyde_white_RGB.png" 
-                     alt="Discord" 
-                     class="discord-icon">
-                使用 Discord 登入
-            `;
-            loginBtn.onclick = loginWithDiscord;
+    const userMenu = document.getElementById("user-menu-container");
+    
+    if (!loginBtn || !userMenu) {
+        console.log('loginBtn:', loginBtn, 'userMenu:', userMenu);
+        let missing = [];
+        if (!loginBtn) missing.push('loginBtn');
+        if (!userMenu) missing.push('userMenu');
+        console.warn(`dclogin.js: 以下元素不存在 [${missing.join(', ')}]，跳過 onAuthStateChanged`);
+        return; // 頁面沒有這些元素就直接跳過
+    }
+    
+    if (user) {
+        // 顯示 user menu
+        loginBtn.style.display = "none";
+        userMenu.style.display = "inline-block";
+        document.getElementById("user-name").textContent = user.displayName || "已登入";
+        if (user.photoURL) {
+            const avatar = document.getElementById("user-avatar");
+            avatar.src = user.photoURL;
+            avatar.style.display = "inline-block";
         }
+        // 綁定登出
+        document.getElementById("logout-btn").onclick = logout;
+        // 綁定上傳
+        document.getElementById("upload-audio-btn").onclick = function() {
+            // TODO: 上傳邏輯
+            alert('上傳功能尚未實作');
+        };
+        // 下拉選單切換
+        const userMenuBtn = document.getElementById('user-menu-btn');
+        const userDropdown = document.getElementById('user-dropdown');
+        if (userMenuBtn && userDropdown) {
+            userMenuBtn.onclick = function(e) {
+                e.stopPropagation();
+                userDropdown.style.display = userDropdown.style.display === 'block' ? 'none' : 'block';
+            };
+            document.addEventListener('click', function() {
+                userDropdown.style.display = 'none';
+            });
+        }
+        loadUserData(user.uid);
+    } else {
+        // 顯示登入按鈕
+        loginBtn.style.display = "";
+        userMenu.style.display = "none";
+        loginBtn.onclick = loginWithDiscord;
     }
 });
 
