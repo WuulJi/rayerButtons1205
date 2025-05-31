@@ -33,6 +33,19 @@
                 <a href="#" class="nav-link">首頁</a>
                 <a href="#" class="nav-link">音效列表</a>
                 <a href="#" class="nav-link">關於我們</a>
+                <!-- 使用者選單按鈕（預設隱藏，登入後顯示） -->
+                <div id="user-menu-container" class="user-menu-container" style="display:none;">
+                    <button id="user-menu-btn" class="nav-link user-btn">
+                        <span id="user-name"></span>
+                        <img id="user-avatar" src="" alt="avatar" class="user-avatar" style="display:none;">
+                        <span class="dropdown-arrow">▼</span>
+                    </button>
+                    <div id="user-dropdown" class="user-dropdown" style="display:none;">
+                        <button id="upload-audio-btn" class="dropdown-item">⬆️ 上傳音檔</button>
+                        <button id="logout-btn" class="dropdown-item">登出</button>
+                    </div>
+                </div>
+                <!-- 登入按鈕（預設顯示，登入後隱藏） -->
                 <button id="discord-login" class="nav-link login-btn" onclick="loginWithDiscord()">
                     <img src="https://assets-global.website-files.com/6257adef93867e50d84d30e2/636e0a6a49cf127bf92de1e2_icon_clyde_white_RGB.png" alt="Discord" class="discord-icon">
                     使用 Discord 登入
@@ -95,5 +108,7 @@
     <script src="/js/auth.js" type="module"></script>
     <script src="/js/dclogin.js" type="module"></script>
     <script src="/js/script.js" type="module"></script>
+    <script src="/js/uploadsounds.js" type="module"></script>
+    <script src="/js/soundBtns.js" type="module"></script>
 </body>
 </html> 
