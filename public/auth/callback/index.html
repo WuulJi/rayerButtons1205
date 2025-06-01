@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Discord 登入中...</title>
+  <link rel="stylesheet" href="/styles.css">
   <!-- 載入 Firebase SDK（compat 版，與主站一致） -->
   <script defer src="/__/firebase/11.8.1/firebase-app-compat.js"></script>
   <script defer src="/__/firebase/11.8.1/firebase-auth-compat.js"></script>
@@ -30,23 +31,28 @@
           }
 
           if (data.token) {
-            // 使用自定義的 custom token 登入 Firebase
-            await firebase.auth().signInWithCustomToken(data.token);
-            // 登入成功，導回首頁
-            window.location.href = '/';
+            try {
+              // 使用自定義的 custom token 登入 Firebase
+              await firebase.auth().signInWithCustomToken(data.token);
+              // 登入成功，導回首頁
+              window.location.href = '/';
+            } catch (err) {
+              document.body.innerHTML = `<h2>登入失敗（Firebase 登入階段）：${err.message}</h2><a href="/">返回首頁</a>`;
+            }
           } else {
-            throw new Error(data.error || 'No token received');
+            document.body.innerHTML = `<h2>登入失敗：${data.error || 'No token received'}</h2><a href="/">返回首頁</a>`;
           }
         } catch (err) {
-          document.body.innerHTML = `<h2>登入失敗：${err.message}</h2>`;
+          document.body.innerHTML = `<h2>登入失敗：${err.message}</h2><a href="/">返回首頁</a>`;
         }
       } else {
-        document.body.innerHTML = '<h2>缺少 code 參數</h2>';
+        document.body.innerHTML = '<h2>缺少 code 參數</h2><a href="/">返回首頁</a>';
       }
     });
   </script>
 </head>
 <body>
   <h2>Discord 登入中，請稍候...</h2>
+  <div class="spinner"></div>
 </body>
 </html>
