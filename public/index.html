@@ -1,12 +1,20 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>蕾兒按鈕</title>
     <link rel="stylesheet" href="/styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
-    
+
+    <!-- Open Graph 基本標籤 -->
+    <meta property="og:title" content="蕾兒按鈕 音效網站" />
+    <meta property="og:description" content="上傳、分享、播放蕾兒音效" />
+    <meta property="og:image" content="https://rayer-buttons-1205.web.app/og-image.png" />
+    <meta property="og:url" content="https://rayer-buttons-1205.web.app/" />
+    <meta property="og:type" content="website" />
+
     <!-- update the version number as needed -->
     <script defer src="/__/firebase/11.8.1/firebase-app-compat.js"></script>
     <!-- include only the Firebase features as you need -->
@@ -25,6 +33,7 @@
     -->
     <script defer src="/__/firebase/init.js?useEmulator=true"></script>
 </head>
+
 <body>
     <header class="header">
         <nav class="nav-container">
@@ -47,7 +56,8 @@
                 </div>
                 <!-- 登入按鈕（預設顯示，登入後隱藏） -->
                 <button id="discord-login" class="nav-link login-btn" onclick="loginWithDiscord()">
-                    <img src="https://assets-global.website-files.com/6257adef93867e50d84d30e2/636e0a6a49cf127bf92de1e2_icon_clyde_white_RGB.png" alt="Discord" class="discord-icon">
+                    <img src="https://cdn.jsdelivr.net/gh/edent/SuperTinyIcons/images/svg/discord.svg"
+                        alt="Discord" class="discord-icon">
                     使用 Discord 登入
                 </button>
             </div>
@@ -110,4 +120,5 @@
     <script src="/js/uploadsounds.js" type="module"></script>
     <script src="/js/soundBtns.js" type="module"></script>
 </body>
-</html> 
+
+</html>

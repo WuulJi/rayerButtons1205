@@ -88,6 +88,7 @@ body {
 .discord-icon {
     width: 20px;
     height: 20px;
+    vertical-align: middle;
 }
 
 .mobile-menu-btn {
@@ -298,4 +299,18 @@ body {
 }
 .dropdown-item:hover {
     background: #f0f0f0;
+}
+
+.spinner {
+    margin: 32px auto;
+    border: 6px solid #e3f2fd;
+    border-top: 6px solid #5fb6ff;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    animation: spin 1s linear infinite;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }

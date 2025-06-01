@@ -1,6 +1,8 @@
 // 音效上傳功能（使用自訂 modal 表單）
 // 需先在 index.html 載入 firebase 相關 SDK
 
+import { notifyDiscord } from './notifyDiscord.js';
+
 // 建立 modal HTML
 function createUploadModal() {
   let modal = document.getElementById('upload-audio-modal');
@@ -40,7 +42,7 @@ function createUploadModal() {
 function showUploadModal() {
   const modal = createUploadModal();  // 取得或建立 modal
   modal.style.display = 'block';  // 將 modal 設為可見
-  
+
   // 幫背景和取消按鈕加上點擊事件，點擊時關閉 modal
   modal.querySelector('.modal-backdrop').onclick = closeUploadModal;
   modal.querySelector('#audio-upload-cancel').onclick = closeUploadModal;
@@ -60,7 +62,7 @@ if (uploadBtn) {
 function handleUploadFormSubmit(e) {
   e.preventDefault();  // 防止表單提交導致頁面刷新
 
-   // 從表單中取得使用者輸入的值
+  // 從表單中取得使用者輸入的值
   const name = document.getElementById('audio-name').value.trim();
   const date = document.getElementById('audio-date').value;
   const time = document.getElementById('audio-time').value;
@@ -127,6 +129,17 @@ function handleUploadFormSubmit(e) {
       });
       closeUploadModal();
       alert('上傳成功！');
+
+      // 上傳成功後通知 Discord
+      const idToken = await user.getIdToken();
+      await notifyDiscord({
+        notifyUrl: '/notifyDiscord',
+        uploader: user.displayName || user.uid,
+        soundName: name,
+        soundDate: dateStr,
+        soundTime: time.replace(':', ''),
+        idToken  //傳給 notifyDiscord，，驗證 Firebase Auth Token
+      });
     } catch (err) {
       console.error('上傳失敗', err);
       errorDiv.textContent = '上傳失敗：' + err.message;
@@ -136,7 +149,7 @@ function handleUploadFormSubmit(e) {
 
 // 綁定表單 submit
 // 用事件代理，因為 modal 可能是動態產生
-window.addEventListener('submit', function(e) {
+window.addEventListener('submit', function (e) {
   if (e.target && e.target.id === 'upload-audio-form') {
     handleUploadFormSubmit(e);
   }
