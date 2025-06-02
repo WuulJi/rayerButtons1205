@@ -235,7 +235,7 @@ export const handleDiscordCallback = functions.https.onRequest(
   },
 );
 
-// 通知 Discord 的 Cloud Function
+// 我的 Cloud Function，作用是通知 Discord Webhook
 export const notifyDiscord = functions.https.onRequest(
   async (req, res) => {
     try {
@@ -271,7 +271,7 @@ export const notifyDiscord = functions.https.onRequest(
         name: decodedToken.name || "(no name)",
       });
 
-      // 2. 驗證請求體中的必要欄位
+      // 2. 驗證請求體中(req.body)的必要欄位
       const {uploader, soundName, soundDate, soundTime} = req.body;
       if (!uploader || !soundName || !soundDate || !soundTime) {
         res.status(400).json({
