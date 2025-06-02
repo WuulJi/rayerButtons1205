@@ -88,6 +88,7 @@ day1_環境設定.md
 day2_index.md
 day3_DC登入功能.md
 day4_上傳音檔功能.md
+day5_DC 同步音效上傳資訊.md
 
 # Environment files (local configs)
 /.env.*
